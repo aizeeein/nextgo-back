@@ -1,22 +1,28 @@
 package db
 
 import (
-	"database/sql"
+	"context"
 	"log"
+	"os"
 
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var DB *sql.DB
+var DB *pgxpool.Pool
 
+// InitDB initializes the database connection pool
 func InitDB() {
+	dsn := os.Getenv("DATABASE_URL") // Make sure this is set in your .env or system
 	var err error
-	connStr := "user=postgres password=Poiuyt123 dbname=authjs sslmode=disable"
-
-	DB, err = sql.Open("postgres", connStr)
+	DB, err = pgxpool.New(context.Background(), dsn)
 	if err != nil {
-		log.Fatal("DB connection error:", err)
+		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
-	log.Println(" Connected to DB")
 }
 
+// CloseDB gracefully closes the DB connection pool
+func CloseDB() {
+	if DB != nil {
+		DB.Close()
+	}
+}
