@@ -62,7 +62,7 @@ func UserByIDHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllUsers(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.DB.Query(r.Context(), `SELECT id, name, email FROM "user"`)
+	rows, err := db.DB.Query(r.Context(), `SELECT id, name, email FROM "user" ORDER BY name ASC`)
 	if err != nil {
 		http.Error(w, "Error fetching users", http.StatusInternalServerError)
 		return
@@ -112,11 +112,18 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Set header
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{
-	"message": "User createdd",
-	"id" : u.ID,
-})
+
+	// Return the full user object (including name and email)
+	json.NewEncoder(w).Encode(u)
+
+// 	json.NewEncoder(w).Encode(map[string]string{
+// 	"message": "User createdd",
+// 	"id" : u.ID,
+// })
 }
 
 func updateUser(w http.ResponseWriter, r *http.Request, id string) {
